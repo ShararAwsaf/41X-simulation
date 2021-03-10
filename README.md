@@ -30,3 +30,13 @@ Observations:
 2. Mask RCNN: Slow but high accuracy
 
 3. We should go with Mask RCNN even though it is not fast because of much higher precision.
+
+Installations required:
+
+Mask RCNN
+- pip3 install tensorflow
+- pip3 install pixellib
+
+SSD
+- pip3 install aspos-imaging-cloud
+
