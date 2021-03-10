@@ -5,7 +5,7 @@ For running code, Please switch to `master` branch.
 
 How to Run Mask RCNN:
 
-1. Mask RCNN model: https://github.com/ayoolaolafenwa/PixelLib/releases/download/1.2/mask_rcnn_coco.h5
+1. Mask RCNN model: [here](https://github.com/ayoolaolafenwa/PixelLib/releases/download/1.2/mask_rcnn_coco.h5)
 
 2. Put model on same level as object-detection-combined.py
 
@@ -33,10 +33,13 @@ Observations:
 
 Installations required:
 
+Both requires:
+- Python Installation at [Python3.8](https://www.python.org/downloads/release/python-388/)
+
 Mask RCNN
-- pip3 install tensorflow
-- pip3 install pixellib
+- `pip3 install tensorflow==2.4.1`
+- `pip3 install pixellib`
 
 SSD
-- pip3 install aspos-imaging-cloud
+- `pip3 install aspos-imaging-cloud`
 
