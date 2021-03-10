@@ -121,6 +121,7 @@ def split_images_2(videoFile):
     vidcap.release()
     print ("Complete")
 
+    return ''
 
 # split_images()
 
@@ -131,13 +132,13 @@ object_detect = ObjectDetectionImage(imaging_api)
 
 videoFile = "./detection/stctrim.mp4"
 
-img_src = ['./detection/frames/frame60.jpg']
+img_src = './detection/frames/frame60.jpg'
 
 def detectObjects(img_src):
     max_count = 0
     prev_max = 0
     avg = 0.0
-    for img in img_src:
+    for img in split_images_2(img_src):
         print("Detecting: ", img)
         img_dest = "./detection/output/detected-"+os.path.basename(img)
 
@@ -158,16 +159,25 @@ def detectObjects(img_src):
     print("MAX COUNT:", max_count)
     print(f"RUNNING AVG: {avg} ")
 
-def viewObjects(img_src):
+def viewObjects(img_src, single_img = False):
     # count = 0
-    for img in split_images_2(videoFile):
-        print("Detecting: ", img)
+
+    def detect_image(img):
         img_dest = "./detection/output/detected-"+os.path.basename(img)
 
         tic = time.perf_counter()
         curr_count = object_detect.visualize_detect_objects_image_from_request_body(img, img_dest)
         toc = time.perf_counter()
         print(f"{img} TIME: {toc - tic:0.4f} seconds")
+
+    if single_img:
+        print("Detecting: ", img_src)
+        detect_image(img_src)
+        return
+
+    for img in split_images_2(img_src):
+        print("Detecting: ", img)
+        detect_image(img)
 
         # count += 1
 
@@ -176,4 +186,5 @@ def viewObjects(img_src):
         # else:
         #     images.append(img_dest)
 
-viewObjects(img_src)
+# viewObjects(videoFile, False) # sliced video detection
+viewObjects(img_src, True) # single image detection
