@@ -9,7 +9,7 @@ How to Run Mask RCNN:
 
 2. Put model on same level as `object-detection-combined.py`
 
-3. `python3 object-detection-combined.py` on Terminal. NOTE: Here frames DO NOT get stored.
+3. `python3 object-detection-combined.py` on Terminal. NOTE: Here frames DO NOT get stored in `./detection/frames/`.
 
 4. OPTIONAL: In the code change the video path to the place where your video to use your own video.
 
