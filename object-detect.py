@@ -186,5 +186,5 @@ def viewObjects(img_src, single_img = False):
         # else:
         #     images.append(img_dest)
 
-# viewObjects(videoFile, False) # sliced video detection
-viewObjects(img_src, True) # single image detection
+viewObjects(videoFile, False) # sliced video detection
+# viewObjects(img_src, True) # single image detection
