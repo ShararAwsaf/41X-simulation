@@ -7,7 +7,7 @@ How to Run Mask RCNN:
 
 1. Download [Mask RCNN model](https://github.com/ayoolaolafenwa/PixelLib/releases/download/1.2/mask_rcnn_coco.h5)
 
-2. Put model on same level as object-detection-combined.py
+2. Put model on same level as `object-detection-combined.py`
 
 3. `python3 object-detection-combined.py` on Terminal. NOTE: Here frames DO NOT get stored.
 
