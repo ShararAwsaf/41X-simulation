@@ -1,6 +1,8 @@
 # 41X-simulation
 Simulation For Object detection for occupancy system
 
+For running code, Please switch to `master` branch.
+
 How to Run Mask RCNN:
 
 1. Mask RCNN model: https://github.com/ayoolaolafenwa/PixelLib/releases/download/1.2/mask_rcnn_coco.h5
