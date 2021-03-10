@@ -41,5 +41,5 @@ Mask RCNN
 - `pip3 install pixellib`
 
 SSD
-- `pip3 install aspos-imaging-cloud`
+- `pip3 install aspose-imaging-cloud`
 
