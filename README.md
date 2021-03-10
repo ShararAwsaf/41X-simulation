@@ -5,7 +5,7 @@ For running code, Please switch to `master` branch.
 
 How to Run Mask RCNN:
 
-1. Mask RCNN model: [here](https://github.com/ayoolaolafenwa/PixelLib/releases/download/1.2/mask_rcnn_coco.h5)
+1. Download [Mask RCNN model](https://github.com/ayoolaolafenwa/PixelLib/releases/download/1.2/mask_rcnn_coco.h5)
 
 2. Put model on same level as object-detection-combined.py
 
