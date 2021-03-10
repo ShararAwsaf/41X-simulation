@@ -21,7 +21,7 @@ How to Run SSD:
 
 Outputs:
 
-1. Find detected images in `detection/output/` directory
+1. Find detected images in `./detection/output/` directory
 
 Observations:
 
