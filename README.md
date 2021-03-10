@@ -6,4 +6,7 @@ Mask RCNN model: https://github.com/ayoolaolafenwa/PixelLib/releases/download/1.
 
 Put model on same level as object-detection-combined.py
 
-In the code change the video path to the place where your video is and run the code.
+`python3 object-detection-combined.py`
+
+OPTIONAL:
+In the code change the video path to the place where your video.
