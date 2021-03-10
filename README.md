@@ -13,6 +13,6 @@ How to Run:
 
 Outputs:
 
-1. Find detected images in `output/` directory
+1. Find detected images in `detection/output/` directory
  
 2. Note the speed is not the best but accuracy is good
