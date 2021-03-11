@@ -72,17 +72,15 @@ def video_detect():
     print("MAX COUNT:", max_count)
     print(f"RUNNING AVG: {avg} ")
 
-def image_detect():
-    path = "./detection/"
-    image = "russia-mall-1"
-    frmt = ".jpg"
+def image_detect(path, image, frmt, output_path):
+    
     tic = time.perf_counter()
     segmask, output = segment_image.segmentImage(path+image+frmt, 
                             show_bboxes = True, 
                             segment_target_classes=target_classes, 
                             extract_segmented_objects= False, 
                             save_extracted_objects=False,
-                            output_image_name = "./detection/output/{}-person-only.jpg".format(image)
+                            output_image_name = "{}{}-person-only.jpg".format(output_path, image)
                             )
     toc = time.perf_counter()
     bbox = len(segmask['rois'])
@@ -91,4 +89,42 @@ def image_detect():
     print("{} CLASS IDS:".format(image), len(segmask['class_ids']))
     print(f"{image} TIME: {toc - tic:0.4f} seconds")
 
-image_detect()
+    return bbox
+
+def live_detect(website, tag, delay=0):
+
+    from selenium import webdriver
+    import time
+
+    driver = webdriver.Chrome('./chromedriver')
+    driver.get(website)
+    time.sleep(20)
+    
+    button = driver.find_element_by_class_name('fullScreenBtn')
+    button.click()
+    
+
+    print(f"CAPTURING IMAGES FROM: {website}.....")
+    count = 0
+    avg = 0.0
+    while count <= 5:
+        count += 1
+        path = "./detection/live/"
+        image = '{}-{}'.format(tag, count)
+        frmt = ".png"
+        output = './detection/output/live/'
+        driver.save_screenshot(path+image+frmt)
+        
+        
+        curr_count = image_detect(path, image, frmt, output)
+        avg = (avg + curr_count)//2
+        print(f"RUNNING AVERAGE: {avg}")
+        time.sleep(delay)
+
+    driver.close()
+
+# image_detect()
+# video_detect()
+url = "https://www.earthcam.com/usa/louisiana/neworleans/bourbonstreet/?cam=catsmeow2"
+tag = "new-orleans"
+live_detect(url, tag)

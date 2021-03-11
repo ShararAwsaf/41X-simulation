@@ -132,7 +132,7 @@ object_detect = ObjectDetectionImage(imaging_api)
 
 videoFile = "./detection/stctrim.mp4"
 
-img_src = './detection/frames/frame60.jpg'
+img_src = './detection/russia-mall-2.jpg'
 
 def detectObjects(img_src):
     max_count = 0
