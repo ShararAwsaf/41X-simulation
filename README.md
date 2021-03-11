@@ -15,6 +15,10 @@ Mask RCNN
 SSD
 - `pip3 install aspose-imaging-cloud`
 
+Live Capture (Mask RCNN only for now)
+- `pip3 install selenium`
+- NOTE: Might need to install Chrome webdriver for newer versions of Google Chrome. The one in the folder uses v88.x
+
 ### How to Run Mask RCNN:
 
 1. Download [Mask RCNN model](https://github.com/ayoolaolafenwa/PixelLib/releases/download/1.2/mask_rcnn_coco.h5)
