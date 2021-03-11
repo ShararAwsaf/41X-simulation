@@ -125,6 +125,12 @@ def live_detect(website, tag, delay=0):
 
 # image_detect()
 # video_detect()
-url = "https://www.earthcam.com/usa/louisiana/neworleans/bourbonstreet/?cam=catsmeow2"
-tag = "new-orleans"
+
+# EXPERIMENT 1: New Orleans
+# url = "https://www.earthcam.com/usa/louisiana/neworleans/bourbonstreet/?cam=catsmeow2"
+# tag = "new-orleans"
+
+# EXPERIMENT 2: Key West Florida
+url = "https://www.earthcam.com/usa/florida/keywest/?cam=irishkevins"
+tag = 'florida'
 live_detect(url, tag)
