@@ -20,7 +20,7 @@ class ObjectDetectionImage(ImagingBase):
 
     def detect_objects_image_from_request_body(self, img_name, output_image_name):
         """detected object on an image that is passed in a request stream"""
-        print('detected object on an image that is passed in a request stream')
+        print(f'{img_name} detected object on an image that is passed in a request stream')
 
         method = 'ssd'
         threshold = 50
@@ -30,7 +30,7 @@ class ObjectDetectionImage(ImagingBase):
         blockedLabels = ""
         input_stream = img_name # os.path.join("./detection/", img_name)
         
-        outPath = output_img_name
+        outPath = output_image_name
         storage = None  # We are using default Cloud Storage
 
         request = requests.CreateObjectBoundsRequest(input_stream, method, threshold,
@@ -126,35 +126,45 @@ def split_images_2(videoFile):
 # split_images()
 
 
-api = "asposeimagingcloudexamples.imaging_examples --clientSecret=c7b1307121677aee924c7c78e03f56fc --clientId=d3ea372d-dd02-4f91-aa8b-7c14fe20ad74"
-imaging_api = ImagingApi('c7b1307121677aee924c7c78e03f56fc', 'd3ea372d-dd02-4f91-aa8b-7c14fe20ad74')
-object_detect = ObjectDetectionImage(imaging_api)
 
-videoFile = "./detection/stctrim.mp4"
 
-img_src = './detection/russia-mall-2.jpg'
-
-def detectObjects(img_src):
-    max_count = 0
-    prev_max = 0
-    avg = 0.0
-    for img in split_images_2(img_src):
-        print("Detecting: ", img)
-        img_dest = "./detection/output/detected-"+os.path.basename(img)
-
+def detectObjects(img_src, single_img=True):
+    def detect_image(img, img_dest):
+        
         tic = time.perf_counter()
         curr_count = object_detect.detect_objects_image_from_request_body(img, img_dest)
         toc = time.perf_counter()
-
-        avg = (avg + curr_count) // 2
-
-        max_count = max(max_count, curr_count)
-
-        if prev_max != max_count:
-            print("MAX COUNT CHANGED:", max_count)
-            prev_max = max_count
-        print(f"RUNNING AVG: {avg} ")
         print(f"{img} TIME: {toc - tic:0.4f} seconds")
+        return curr_count
+
+    img_dest = "./detection/output/detected-"+os.path.basename(img_src)
+    max_count = 0
+    prev_max = 0
+    avg = 0.0
+    if not single_img:
+        for img in split_images_2(img_src):
+            img_dest = "./detection/output/detected-"+os.path.basename(img)
+
+            print("Detecting: ", img)
+
+            tic = time.perf_counter()
+            curr_count = detect_image(img, img_dest)
+            toc = time.perf_counter()
+
+            avg = (avg + curr_count) // 2
+
+            max_count = max(max_count, curr_count)
+
+            if prev_max != max_count:
+                print("MAX COUNT CHANGED:", max_count)
+                prev_max = max_count
+            print(f"RUNNING AVG: {avg} ")
+            print(f"{img} TIME: {toc - tic:0.4f} seconds")
+    else:
+        print("Detecting: ", img_src)
+
+        max_count = detect_image(img_src, img_dest)
+        avg = max_count
 
     print("MAX COUNT:", max_count)
     print(f"RUNNING AVG: {avg} ")
@@ -186,5 +196,15 @@ def viewObjects(img_src, single_img = False):
         # else:
         #     images.append(img_dest)
 
-viewObjects(videoFile, False) # sliced video detection
+# viewObjects(videoFile, False) # sliced video detection
 # viewObjects(img_src, True) # single image detection
+
+api = "asposeimagingcloudexamples.imaging_examples --clientSecret=c7b1307121677aee924c7c78e03f56fc --clientId=d3ea372d-dd02-4f91-aa8b-7c14fe20ad74"
+imaging_api = ImagingApi('c7b1307121677aee924c7c78e03f56fc', 'd3ea372d-dd02-4f91-aa8b-7c14fe20ad74')
+object_detect = ObjectDetectionImage(imaging_api)
+
+videoFile = "./detection/stctrim.mp4"
+
+img_src = './detection/pub-pic.png'
+detectObjects(img_src) # single image detection
+

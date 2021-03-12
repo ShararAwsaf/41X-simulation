@@ -6,6 +6,9 @@ import cv2
 import math
 import numpy as np
 
+from selenium import webdriver
+
+
 tic = time.perf_counter()
 segment_image = instance_segmentation(infer_speed="average") # infer_speed = "average"
 segment_image.load_model("mask_rcnn_coco.h5")
@@ -13,11 +16,10 @@ target_classes = segment_image.select_target_classes(person=True)
 toc = time.perf_counter()
 print(f"INITIALIZING TIME: {toc - tic:0.4f} seconds")
 
-def video_detect(): 
+def video_detect(videoFile): 
 
     #################### Setting up the file ################
 
-    videoFile = "./detection/stctrim.mp4"
     vidcap = cv2.VideoCapture(videoFile)
     success,image = vidcap.read()
 
@@ -91,10 +93,7 @@ def image_detect(path, image, frmt, output_path):
 
     return bbox
 
-def live_detect(website, tag, delay=0):
-
-    from selenium import webdriver
-    import time
+def live_detect_earth_cam(website, tag, delay=0):
 
     driver = webdriver.Chrome('./chromedriver')
     driver.get(website)
@@ -123,14 +122,61 @@ def live_detect(website, tag, delay=0):
 
     driver.close()
 
-# image_detect()
-# video_detect()
 
-# EXPERIMENT 1: New Orleans
-# url = "https://www.earthcam.com/usa/louisiana/neworleans/bourbonstreet/?cam=catsmeow2"
-# tag = "new-orleans"
+def live_detect_insecam(website, tag, delay=0):
+    driver = webdriver.Chrome('./chromedriver')
+    driver.get(website)
+    time.sleep(15)
+    button = driver.find_element_by_id('playIcon')
+    button.click()
+    time.sleep(1)
+    button = driver.find_element_by_css_selector("[title*='Full screen']")
+    button.click()
+    time.sleep(2)
+
+    print(f"CAPTURING IMAGES FROM: {website}.....")
+    count = 0
+    avg = 0.0
+    while count <= 5:
+        count += 1
+        path = "./detection/live/"
+        image = '{}-{}'.format(tag, count)
+        frmt = ".png"
+        output = './detection/output/live/'
+        driver.save_screenshot(path+image+frmt)
+        
+        
+        curr_count = image_detect(path, image, frmt, output)
+        avg = (avg + curr_count)//2
+        print(f"RUNNING AVERAGE: {avg}")
+        time.sleep(delay)
+
+videoFile = "./detection/stctrim.mp4"
+path = "./detection/"
+image = 'pub-pic'
+frmt = ".png"
+output = './detection/output/'
+# image_detect(path, image, frmt, output)
+# video_detect(videoFile)
+
+# EXPERIMENT 1: New Orleans (use Cats Meow and The Bourbon Street View)
+url = "https://www.earthcam.com/usa/louisiana/neworleans/bourbonstreet/?cam=catsmeow2"
+# url = "https://www.earthcam.com/usa/louisiana/neworleans/bourbonstreet/?cam=bourbonstreet"
+tag = "new-orleans"
 
 # EXPERIMENT 2: Key West Florida
-url = "https://www.earthcam.com/usa/florida/keywest/?cam=irishkevins"
-tag = 'florida'
-live_detect(url, tag)
+# url = "https://www.earthcam.com/usa/florida/keywest/?cam=irishkevins"
+# tag = 'florida'
+
+# EXPERIMENT 3: Times Square
+# url = "https://www.earthcam.com/usa/newyork/timessquare/?cam=tsstreet"
+# tag = "nyc"
+
+
+
+# live_detect_earth_cam(url, tag)
+
+
+insecam_url = "http://128.206.113.98/#view"
+tag = "russia-mall"
+live_detect_insecam(insecam_url, tag)
