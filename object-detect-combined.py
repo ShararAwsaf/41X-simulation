@@ -9,6 +9,9 @@ import numpy as np
 from selenium import webdriver
 
 import psycopg2
+
+import sys
+
 def setup_db():
     connection, cursor = None, None
     try:
@@ -34,12 +37,12 @@ def insert_to_occupancy_table(connection, cursor, loc, cam, area, occ):
 
         connection.commit()
         count = cursor.rowcount
-        print(count, "Record inserted successfully into mobile table")
+        print(count, "Record inserted successfully into occupancy_table table")
 
     except (Exception, psycopg2.Error) as error:
         print("Failed to insert record into occupancy_table", error)
 
-
+    
 def initialize_model():
     tic = time.perf_counter()
     segment_image = instance_segmentation(infer_speed="average") # infer_speed = "average"
@@ -198,21 +201,34 @@ output = './detection/output/'
 # EXPERIMENT 1: New Orleans (use Cats Meow and The Bourbon Street View)
 # url = "https://www.earthcam.com/usa/louisiana/neworleans/bourbonstreet/?cam=catsmeow2"
 url = "https://www.earthcam.com/usa/louisiana/neworleans/bourbonstreet/?cam=bourbonstreet"
-tag = "new-orleans"
 
 # EXPERIMENT 2: Key West Florida
-url = "https://www.earthcam.com/usa/florida/keywest/?cam=irishkevins"
-# tag = 'florida'
+# url = "https://www.earthcam.com/usa/florida/keywest/?cam=irishkevins"
 
 # EXPERIMENT 3: Times Square
 # url = "https://www.earthcam.com/usa/newyork/timessquare/?cam=tsstreet"
-# tag = "nyc"
+
 
 
 conn, cur = setup_db()
+loc = 'New Orleans'
+cam = 'Cam1'
+area = 400
+
+if len(sys.argv) > 1:
+    url = "https://www.earthcam.com/usa/louisiana/neworleans/bourbonstreet/?cam=catsmeow2"
+    cam = 'Cam2'
+    area = 800
+
+tag =  f"{loc}-{cam}".replace(" ", "_").lower()
+
+print(f"Fetching From : {url}")
+print(f"Location : {loc}")
+print(f"Camera : {cam} | Area : {area}")
+print(f"Image Tag: {tag}")
 
 for o in live_detect_earth_cam(url, tag):
-    insert_to_occupancy_table(conn, cur, loc='New Orleans', cam='Cam1', area=400, occ=o)
+    insert_to_occupancy_table(conn, cur, loc=loc, cam=cam, area=area, occ=o)
 
 
 
