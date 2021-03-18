@@ -48,7 +48,6 @@ def initialize_model():
     print(f"INITIALIZING TIME: {toc - tic:0.4f} seconds")
     return segment_image
 
-segment_image = initialize_model()
 
 def video_detect(videoFile): 
 
@@ -108,8 +107,7 @@ def video_detect(videoFile):
     print("MAX COUNT:", max_count)
     print(f"RUNNING AVG: {avg} ")
 
-def image_detect(path, image, frmt, output_path):
-    print(f"STARTING DETECTION: {image}...")
+def image_detect(path, image, frmt, output_path, segment_image):
     target_classes = segment_image.select_target_classes(person=True)
     
     tic = time.perf_counter()
@@ -130,6 +128,7 @@ def image_detect(path, image, frmt, output_path):
     return bbox
 
 def live_detect_earth_cam(website, tag, delay=0):
+    segment_image = initialize_model()
 
     driver = webdriver.Chrome('./chromedriver')
     driver.get(website)
@@ -150,7 +149,7 @@ def live_detect_earth_cam(website, tag, delay=0):
         output = './detection/output/live/'
         driver.save_screenshot(path+image+frmt)
         
-        curr_count = image_detect(path, image, frmt, output)
+        curr_count = image_detect(path, image, frmt, output, segment_image)
         yield curr_count
         
         avg = (avg + curr_count)//2
@@ -202,7 +201,7 @@ url = "https://www.earthcam.com/usa/louisiana/neworleans/bourbonstreet/?cam=bour
 tag = "new-orleans"
 
 # EXPERIMENT 2: Key West Florida
-# url = "https://www.earthcam.com/usa/florida/keywest/?cam=irishkevins"
+url = "https://www.earthcam.com/usa/florida/keywest/?cam=irishkevins"
 # tag = 'florida'
 
 # EXPERIMENT 3: Times Square
