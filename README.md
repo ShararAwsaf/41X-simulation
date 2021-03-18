@@ -20,6 +20,7 @@ Live Capture (Mask RCNN only for now)
 - NOTE: Might need to install Chrome webdriver for newer versions of Google Chrome. The one in the folder uses v88.x
 
 Postgres SQL DB storage
+- `brew install postgresql`
 - `pip install psycopg2`
 - `pip install psycopg2-binary`
 - NOTE: if the first fails try second one and check if psycopg2 is installed by following Terminal commands:
@@ -29,6 +30,11 @@ python
 >>> import psycopg2
 >>> # if it errors then unsuccessful else successful
 ```
+
+Visualization
+- `brew install grafana`
+- use the [quick start guide](https://grafana.com/docs/grafana/latest/getting-started/getting-started/)
+
 ### How to Run Mask RCNN:
 
 1. Download [Mask RCNN model](https://github.com/ayoolaolafenwa/PixelLib/releases/download/1.2/mask_rcnn_coco.h5)
