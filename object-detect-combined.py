@@ -8,13 +8,47 @@ import numpy as np
 
 from selenium import webdriver
 
+import psycopg2
+def setup_db():
+    connection, cursor = None, None
+    try:
+        connection = psycopg2.connect(user="postgres",
+                                    password="pgpass",
+                                    host="127.0.0.1",
+                                    port="5432",
+                                    database="postgres")
+        cursor = connection.cursor()
 
-tic = time.perf_counter()
-segment_image = instance_segmentation(infer_speed="average") # infer_speed = "average"
-segment_image.load_model("mask_rcnn_coco.h5")
-target_classes = segment_image.select_target_classes(person=True)
-toc = time.perf_counter()
-print(f"INITIALIZING TIME: {toc - tic:0.4f} seconds")
+        
+    except (Exception, psycopg2.Error) as error:
+        print("Failed to Establish connection", error)
+
+    return connection, cursor
+
+def insert_to_occupancy_table(connection, cursor, loc, cam, area, occ):
+    try:
+
+        postgres_insert_query = """ INSERT INTO occupancy_table (LOCATION, CAMERA, AREA, OCCUPANCY) VALUES (%s,%s,%s,%s)"""
+        record_to_insert = (loc, cam, area, occ)
+        cursor.execute(postgres_insert_query, record_to_insert)
+
+        connection.commit()
+        count = cursor.rowcount
+        print(count, "Record inserted successfully into mobile table")
+
+    except (Exception, psycopg2.Error) as error:
+        print("Failed to insert record into occupancy_table", error)
+
+
+def initialize_model():
+    tic = time.perf_counter()
+    segment_image = instance_segmentation(infer_speed="average") # infer_speed = "average"
+    segment_image.load_model("mask_rcnn_coco.h5")
+    toc = time.perf_counter()
+    print(f"INITIALIZING TIME: {toc - tic:0.4f} seconds")
+    return segment_image
+
+segment_image = initialize_model()
 
 def video_detect(videoFile): 
 
@@ -75,6 +109,8 @@ def video_detect(videoFile):
     print(f"RUNNING AVG: {avg} ")
 
 def image_detect(path, image, frmt, output_path):
+    print(f"STARTING DETECTION: {image}...")
+    target_classes = segment_image.select_target_classes(person=True)
     
     tic = time.perf_counter()
     segmask, output = segment_image.segmentImage(path+image+frmt, 
@@ -114,8 +150,9 @@ def live_detect_earth_cam(website, tag, delay=0):
         output = './detection/output/live/'
         driver.save_screenshot(path+image+frmt)
         
-        
         curr_count = image_detect(path, image, frmt, output)
+        yield curr_count
+        
         avg = (avg + curr_count)//2
         print(f"RUNNING AVERAGE: {avg}")
         time.sleep(delay)
@@ -160,8 +197,8 @@ output = './detection/output/'
 # video_detect(videoFile)
 
 # EXPERIMENT 1: New Orleans (use Cats Meow and The Bourbon Street View)
-url = "https://www.earthcam.com/usa/louisiana/neworleans/bourbonstreet/?cam=catsmeow2"
-# url = "https://www.earthcam.com/usa/louisiana/neworleans/bourbonstreet/?cam=bourbonstreet"
+# url = "https://www.earthcam.com/usa/louisiana/neworleans/bourbonstreet/?cam=catsmeow2"
+url = "https://www.earthcam.com/usa/louisiana/neworleans/bourbonstreet/?cam=bourbonstreet"
 tag = "new-orleans"
 
 # EXPERIMENT 2: Key West Florida
@@ -173,10 +210,13 @@ tag = "new-orleans"
 # tag = "nyc"
 
 
+conn, cur = setup_db()
 
-# live_detect_earth_cam(url, tag)
+for o in live_detect_earth_cam(url, tag):
+    insert_to_occupancy_table(conn, cur, loc='New Orleans', cam='Cam1', area=400, occ=o)
 
 
-insecam_url = "http://128.206.113.98/#view"
-tag = "russia-mall"
-live_detect_insecam(insecam_url, tag)
+
+# insecam_url = "http://128.206.113.98/#view"
+# tag = "russia-mall"
+# live_detect_insecam(insecam_url, tag)
