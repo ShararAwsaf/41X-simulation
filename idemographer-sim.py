@@ -35,18 +35,23 @@ VIDEO_DETECT_DELAY = 1
 NUMBER_OF_SAMPLES = 5
 
 def setup_db():
+
     connection, cursor = None, None
+    logger.info("Connecting to Database...")
     try:
+        start_time = time.perf_counter()
         connection = psycopg2.connect(user="postgres",
                                     password="pgpass",
                                     host="127.0.0.1",
                                     port="5432",
                                     database="postgres")
         cursor = connection.cursor()
+        finish_time = time.perf_counter()
 
+        logger.info(f"Database Connection Time: {finish_time - start_time:0.4f} seconds")
         
     except (Exception, psycopg2.Error) as error:
-        print("Failed to Establish connection", error)
+        logger.info("Failed to Establish connection", error)
 
     return connection, cursor
 
@@ -162,7 +167,6 @@ def image_detect(image_path, output_path=OUTPUT_PATH):
 def live_detect_earth_cam(url, tag):
     
     options = Options()
-    options.add_argument('--headless')
     options.add_argument('--disable-gpu')
 
     driver = webdriver.Chrome(WEBDRIVER_PATH, chrome_options=options)
