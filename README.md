@@ -27,9 +27,18 @@ Visualization
 
 ### Run the simulation 
 
-`python idemographer-sim.py <detection_type>`
+```
+python3 idemographer-sim.py <detection_type> '<location>' '<Camera Name>' '<Area Covered By Camera>' '<EarthCam URL>'
+```
+
+Example Execution
+```
+python3 idemographer-sim.py earthcam 'New Orleans' 'Cam1' '400' 'https://www.earthcam.com/usa/louisiana/neworleans/bourbonstreet/?cam=bourbonstreet'
+```
 
 detection_type can be `image`, `video`, or `earthcam`
+location, camera name needs to be in quotes if space delimited
+
 
 
 
