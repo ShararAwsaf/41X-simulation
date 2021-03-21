@@ -24,7 +24,7 @@ logging.basicConfig(
 
 logger = logging.getLogger("rich")
 
-DATA_PATH = "detection"
+DATA_PATH = os.path.join('.', "detection")
 STC_VIDEO_FILE = os.path.join(DATA_PATH, "stctrim.mp4")
 IMAGE_FORMAT = "png"
 OUTPUT_PATH = os.path.join(DATA_PATH, "output")
@@ -32,7 +32,7 @@ WEBDRIVER_PATH = os.path.join("drivers", "chromedriver")
 
 RCNN_MODEL_H5 = os.path.join("models", "mask_rcnn_coco.h5")
 VIDEO_DETECT_DELAY = 1
-
+NUMBER_OF_SAMPLES = 5
 
 def setup_db():
     connection, cursor = None, None
@@ -135,7 +135,7 @@ def video_detect(videoFile):
     logger.info(f"Max Count: {max_count}")
 
 
-def image_detect(image_path):
+def image_detect(image_path, output_path=OUTPUT_PATH):
     target_classes = MODEL.select_target_classes(person=True)
     
     start_time = time.perf_counter()
@@ -145,8 +145,7 @@ def image_detect(image_path):
                             segment_target_classes=target_classes, 
                             extract_segmented_objects= False, 
                             save_extracted_objects=False,
-                            output_image_name = os.path.join(OUTPUT_PATH, 
-                                f"person-only-{os.path.basename(image_path)}")
+                            output_image_name = os.path.join(output_path, os.path.basename(image_path))
                             )
 
     finish_time = time.perf_counter()
@@ -160,39 +159,44 @@ def image_detect(image_path):
     return bounding_box
 
 
-def live_detect_earth_cam(url, tag, delay=0):
+def live_detect_earth_cam(url, tag):
+    
     options = Options()
     options.add_argument('--headless')
     options.add_argument('--disable-gpu')
 
     driver = webdriver.Chrome(WEBDRIVER_PATH, chrome_options=options)
     driver.get(url)
-
     # We need this sleep to wait for the ad to complete
-    time.sleep(20)
+    button_clicked = False
     
-    button = driver.find_element_by_class_name('fullScreenBtn')
-    button.click()
+    while not button_clicked:
+        try:
+            button = driver.find_element_by_class_name('fullScreenBtn')
+            button.click()
+            button_clicked = True
+        except Exception as e:
+            logger.info(f"Button pressing failed : {e}")
 
     logger.info(f"Capturing from {url}...")
 
     running_avg = 0.0
-    num_samples = 50
+    num_samples = NUMBER_OF_SAMPLES
     live_capture_path = os.path.join(DATA_PATH, "live")
     live_output_path = os.path.join(OUTPUT_PATH, "live")
 
     for i in range(0, num_samples):
-        image_path = f"{live_capture_path}-{i}.png"
+        image_path = os.path.join(live_capture_path, f"{tag}-{i}.{IMAGE_FORMAT}")
         driver.save_screenshot(image_path)
         
-        curr_count = image_detect(image_path)
+        curr_count = image_detect(image_path, live_output_path)
         running_avg = (running_avg + curr_count) // 2
 
         logger.info(f"Running Average: {running_avg}")
 
         yield curr_count
 
-        time.sleep(VIDEO_DETECT_DELAY)
+        # time.sleep(VIDEO_DETECT_DELAY)
 
     driver.close()
 
@@ -248,15 +252,22 @@ if __name__ == "__main__":
     elif detection_type == "video":
         video_detect(STC_VIDEO_FILE)
     elif detection_type == "earthcam":
-        location = 'New Orleans'
-        cam_num = 'Cam1'
-        tag =  f"{location}-{cam_num}".replace(" ", "_").lower()
+        if len(sys.argv) != 6:
+            logger.info("Please provide location, camera name, area, earthcam URL in order when using earthcam detection type")
+        else:            
+            location = sys.argv[2]
+            cam_num = sys.argv[3]
+            area = sys.argv[4]
+            tag =  f"{location}-{cam_num}".replace(" ", "_").lower()
 
-        url = "https://www.earthcam.com/usa/louisiana/neworleans/bourbonstreet/?cam=bourbonstreet"
+            # url = "https://www.earthcam.com/usa/louisiana/neworleans/bourbonstreet/?cam=bourbonstreet"
+            url = sys.argv[5]
 
-        # for o in live_detect_earth_cam(url, tag):
-        #     insert_to_occupancy_table(conn, cur, loc=loc, cam=cam, area=area, occ=o)
-        live_detect_earth_cam(url, tag)
+            connection, cursor = setup_db()
+            for o in live_detect_earth_cam(url, tag):
+                insert_to_occupancy_table(connection, cursor, loc=location, cam=cam_num, area=area, occ=o)
+                
+
     elif detection_type == "insecam":
         pass
         location = 'Toronto'
