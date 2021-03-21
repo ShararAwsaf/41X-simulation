@@ -167,7 +167,7 @@ def image_detect(image_path, output_path=OUTPUT_PATH):
 def live_detect_earth_cam(url, tag):
     
     options = Options()
-    options.add_argument('--disable-gpu')
+    options.add_argument("--disable-gpu")
 
     driver = webdriver.Chrome(WEBDRIVER_PATH, chrome_options=options)
     driver.get(url)
