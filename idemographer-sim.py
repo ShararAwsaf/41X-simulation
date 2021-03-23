@@ -1,6 +1,7 @@
 import time
 import pixellib
 from pixellib.instance import instance_segmentation
+from pixellib.tune_bg import alter_bg
 
 import cv2
 import math
@@ -33,6 +34,9 @@ WEBDRIVER_PATH = os.path.join("drivers", "chromedriver")
 RCNN_MODEL_H5 = os.path.join("models", "mask_rcnn_coco.h5")
 VIDEO_DETECT_DELAY = 1
 NUMBER_OF_SAMPLES = 5
+
+MODEL = None
+BLUR_MODEL = None
 
 def setup_db():
 
@@ -85,7 +89,6 @@ def initialize_model():
     
     return segment_image
 
-MODEL = initialize_model()
 
 def video_detect(videoFile): 
     vidcap = cv2.VideoCapture(videoFile)
@@ -139,6 +142,21 @@ def video_detect(videoFile):
     logger.info("Finished")
     logger.info(f"Max Count: {max_count}")
 
+
+def initialize_model_blur():
+    change_bg = alter_bg(model_type = "pb")
+    change_bg.load_pascalvoc_model("./models/xception_pascalvoc.pb")
+    return change_bg
+
+def image_blur(image_path, output_path=OUTPUT_PATH, tag=None):
+    if not tag:
+        tag = "blur-"
+    out_path = os.path.join(output_path, tag+os.path.basename(image_path))
+    print(f"Changing {image_path} Background and storing at {out_path}")
+    # image_path = './detection/stc-1.png'
+    # output_path = "./detection/output/stc-1-blur.png"
+    BLUR_MODEL.blur_bg(image_path, low=True, detect="person", output_image_name=out_path )
+    
 
 def image_detect(image_path, output_path=OUTPUT_PATH):
     target_classes = MODEL.select_target_classes(person=True)
@@ -239,9 +257,7 @@ def live_detect_insecam(url, tag):
 
     driver.close()
 
-
-
-if __name__ == "__main__":
+def driver():
     detection_type = "video"
     # conn, cur = setup_db()
 
@@ -251,10 +267,21 @@ if __name__ == "__main__":
     logger.info(f"Using detection type: {detection_type}")
     
     if detection_type == "image":
-        sample_image = os.path.join(DATA_PATH, "sample_1.jpeg")
+        image = "sample_1.jpeg"
+        if len(sys.argv) > 2:
+            image = sys.argv[2]
+
+        sample_image = os.path.join(DATA_PATH, image)
         image_detect(sample_image)
     elif detection_type == "video":
-        video_detect(STC_VIDEO_FILE)
+        
+        video = STC_VIDEO_FILE
+        if len(sys.argv) > 2:
+            video = sys.argv[2]
+
+        sample_video = os.path.join(DATA_PATH, video)
+        video_detect(sample_video)
+
     elif detection_type == "earthcam":
         if len(sys.argv) != 6:
             logger.info("Please provide location, camera name, area, earthcam URL in order when using earthcam detection type")
@@ -284,3 +311,9 @@ if __name__ == "__main__":
         logger.info("Unknown detection type provided. Please use one of (image|video|earthcam)")
 
 
+if __name__ == "__main__":
+
+    # BLUR_MODEL = initialize_model_blur()
+    # image_blur(sys.argv[1])
+    MODEL = initialize_model()
+    driver()
